@@ -1,11 +1,11 @@
 # Project Status
 
-**현재 Phase**: 0 — Project Skeleton & Harness Engineering (진행 중)
+**현재 Phase**: Phase 0 완료. 다음: Phase 1 — 데이터 인제스트 (Go)
 **마지막 업데이트**: 2026-05-02
 
 ## Phase 진행 상황
 
-- [ ] **Phase 0** — 골격 + 하네스 + 룰
+- [x] **Phase 0** — 골격 + 하네스 + 룰 (2026-05-02 완료)
 - [ ] Phase 1 — 데이터 인제스트 (Go)
 - [ ] Phase 2 — Feature Engineering (Python)
 - [ ] Phase 3 — 백테스트 엔진 + Clenow Momentum
@@ -23,6 +23,7 @@
 
 ## 최근 변경 이력
 
+- **2026-05-02** Phase 0 완료 — 디렉터리 골격, 하네스 문서 5종, 6명 에이전트 정의, Docker Postgres+TimescaleDB 인프라 구축
 - **2026-05-02** Phase 0 시작 — 브레인스토밍 완료, foundation spec 승인, 구현 plan 작성
 
 ## 업데이트 규칙
