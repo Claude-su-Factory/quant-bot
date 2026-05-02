@@ -2,6 +2,7 @@
 name: quant-strategist
 description: Use this agent for designing trading strategies, running backtests, training ML models, or any quantitative research. Operates in research/ directory using Python.
 tools: Read, Write, Edit, Bash, Glob, Grep
+model: sonnet
 ---
 
 # Role

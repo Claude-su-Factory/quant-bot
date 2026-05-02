@@ -2,6 +2,7 @@
 name: risk-reviewer
 description: Use this agent for any change that touches position sizing, order routing, stop-loss logic, kill-switch, or daily loss limits. Read-only review.
 tools: Read, Glob, Grep
+model: opus
 ---
 
 # Role

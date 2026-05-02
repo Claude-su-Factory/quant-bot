@@ -166,19 +166,22 @@ quant-bot/
 name: <agent-name>
 description: <언제 호출해야 하는가 — 1~2줄>
 tools: Read, Write, Edit, Bash, Glob, Grep   # 권한 화이트리스트
+model: <haiku | sonnet | opus>               # 작업 복잡도에 따라 핀 고정
 ---
 
 <system prompt 본문 — 역할, 핵심 원칙, 작업 흐름, 금지 사항>
 ```
 
-| 에이전트 | 역할 | 도구 권한 | 시스템 프롬프트 핵심 원칙 |
-|---------|------|----------|---------------------------|
-| `quant-strategist` | 전략 설계, 백테스트, 모델 훈련 (Python) | Read, Write, Edit, Bash, Glob, Grep | walk-forward 검증 의무, in-sample 신뢰 금지, 모든 가정을 명시, **주문/실행 API 직접 호출 금지, `live`·`paper` 브로커 키 접근 금지** (research/ 외부 디렉터리 쓰기 금지) |
-| `execution-engineer` | 브로커 어댑터, 주문 관리, 실행 엔진 (Go) | Read, Write, Edit, Bash, Glob, Grep | R1·R2·R3 강제, idempotency, reconciliation |
-| `data-engineer` | 데이터 파이프라인, 스키마 (Go+Python) | Read, Write, Edit, Bash, Glob, Grep | point-in-time 보장, look-ahead 방지, 출처/타임스탬프 보존 |
-| `quant-skeptic` | 적대적 전략 검증 | Read, Glob, Grep, Bash, WebSearch | "이 전략은 작동하지 않는다"가 기본 입장, 증명 책임을 strategist에 |
-| `risk-reviewer` | 리스크 변경 검증 | Read, Glob, Grep (의도적 read-only) | "봇이 죽을 때 최대 손실은?"을 항상 답하게 함 |
-| `docs-keeper` | 하네스 문서 동기화 | Read, Edit, Glob, Grep, Bash (`git log`) | "구현 끝났지만 문서 안 됐다 = 미완료" |
+**모델 핀 고정 (MANDATORY)**: 모든 에이전트는 `model:` 필드를 명시한다. 부모 세션 모델 상속에 의존하면 동일 작업이 호출 컨텍스트에 따라 다른 결과를 내므로 재현성·예측 비용 모두 깨진다.
+
+| 에이전트 | 역할 | 도구 권한 | model | 시스템 프롬프트 핵심 원칙 |
+|---------|------|----------|-------|---------------------------|
+| `quant-strategist` | 전략 설계, 백테스트, 모델 훈련 (Python) | Read, Write, Edit, Bash, Glob, Grep | sonnet | walk-forward 검증 의무, in-sample 신뢰 금지, 모든 가정을 명시, **주문/실행 API 직접 호출 금지, `live`·`paper` 브로커 키 접근 금지** |
+| `execution-engineer` | 브로커 어댑터, 주문 관리, 실행 엔진 (Go) | Read, Write, Edit, Bash, Glob, Grep | sonnet | R1·R2·R3 강제, idempotency, reconciliation |
+| `data-engineer` | 데이터 파이프라인, 스키마 (Go+Python) | Read, Write, Edit, Bash, Glob, Grep | sonnet | point-in-time 보장, look-ahead 방지, 출처/타임스탬프 보존 |
+| `quant-skeptic` | 적대적 전략 검증 | Read, Glob, Grep, Bash, WebSearch | **opus** | "이 전략은 작동하지 않는다"가 기본 입장, 증명 책임을 strategist에 — 가장 깊은 회의적 추론 필요 |
+| `risk-reviewer` | 리스크 변경 검증 | Read, Glob, Grep (의도적 read-only) | **opus** | "봇이 죽을 때 최대 손실은?"을 항상 답하게 함 — 안전 critical |
+| `docs-keeper` | 하네스 문서 동기화 | Read, Edit, Glob, Grep, Bash (`git log`) | haiku | "구현 끝났지만 문서 안 됐다 = 미완료" — 단순 동기화 |
 
 ### 사용 흐름 (참고)
 
@@ -353,3 +356,4 @@ volumes:
 | 2026-05-02 | 실행 방식 룰 추가 | 사용자가 "항상 Subagent-Driven 실행"을 프로젝트 표준으로 채택 → §7.1 CLAUDE.md 명세에 "구현 실행 방식 (MANDATORY)" 룰 추가. Inline Execution 사용 금지. |
 | 2026-05-02 | 실행 룰 차등 적용 추가 | Phase 0 Task 1·2 실측 후 doc-only task에 3-stage 리뷰 적용은 비효율로 판단 → 룰 보강: code task는 3-stage, doc-only(마크다운·README·system prompt 등 실행 불가능 자산)는 implementer + spec reviewer 2-stage만. 동일 성격 doc 다수는 task 번들링 허용(커밋은 파일별 분리). |
 | 2026-05-02 | TDD·code-review·investigate 스킬 룰 추가 | Phase 0 회고 — `test-driven-development`, `requesting-code-review`, `investigate` 스킬을 형식적으로 호출하지 않고 진행한 사실 발견 → §7.1 "Phase 1+ code task 추가 룰" 신설: TDD 강제, 코드 리뷰는 `requesting-code-review` 스킬 형식 사용, 디버깅은 `investigate` 4-phase 적용. Phase 0은 면제(코드 자산 없음). |
+| 2026-05-02 | 에이전트 모델 핀 고정 | 6개 에이전트 정의에 `model:` 필드 추가 — strategist/execution/data: sonnet, skeptic/risk: opus, docs-keeper: haiku. 이유: 부모 세션 모델 상속 시 호출 컨텍스트 따라 결과 비일관. §6 표 + 파일 형식 템플릿 동기화. |

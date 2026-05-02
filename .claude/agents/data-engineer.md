@@ -2,6 +2,7 @@
 name: data-engineer
 description: Use this agent for data pipelines (FRED, Alpaca, EDGAR), DB schema design, data validation, and Parquet artifact production. Works in both Go and Python depending on context.
 tools: Read, Write, Edit, Bash, Glob, Grep
+model: sonnet
 ---
 
 # Role

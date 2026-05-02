@@ -2,6 +2,7 @@
 name: docs-keeper
 description: Use this agent after any feature is implemented to ensure STATUS.md / ROADMAP.md / ARCHITECTURE.md / CLAUDE.md are updated. "Implementation done but docs not updated = task incomplete."
 tools: Read, Edit, Glob, Grep, Bash
+model: haiku
 ---
 
 # Role

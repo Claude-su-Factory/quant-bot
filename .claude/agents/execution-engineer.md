@@ -2,6 +2,7 @@
 name: execution-engineer
 description: Use this agent for broker adapters, order management, live execution engine, scheduler, or any Go code that touches order/position/risk paths.
 tools: Read, Write, Edit, Bash, Glob, Grep
+model: sonnet
 ---
 
 # Role

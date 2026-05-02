@@ -23,6 +23,7 @@
 
 ## 최근 변경 이력
 
+- **2026-05-02** 에이전트 모델 핀 고정 — 6개 에이전트 frontmatter에 `model:` 추가 (strategist/execution/data=sonnet, skeptic/risk=opus, docs-keeper=haiku). 호출 컨텍스트 무관하게 일관된 모델 사용
 - **2026-05-02** 룰 보강 — Phase 1+ code task에 TDD(`test-driven-development` 스킬), 코드 리뷰(`requesting-code-review` 스킬), 디버깅(`investigate` 스킬) 강제 룰 추가 (CLAUDE.md / spec / plan 동기화)
 - **2026-05-02** Phase 0 완료 — 디렉터리 골격, 하네스 문서 5종, 6명 에이전트 정의, Docker Postgres+TimescaleDB 인프라 구축
 - **2026-05-02** Phase 0 시작 — 브레인스토밍 완료, foundation spec 승인, 구현 plan 작성
