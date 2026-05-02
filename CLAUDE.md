@@ -31,7 +31,7 @@
 | R5 | 지표는 결정 규칙이 아닌 feature로만 도입 | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
 | R6 | Feature catalog (`shared/contracts/features.md`)가 단일 진실 원천 | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
 | R7 | Walk-forward 검증 안 거친 전략은 페이퍼도 금지 | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
-| R8 | 페이퍼 트레이딩 6개월 미만 → 라이브 전환 금지 | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
+| R8 | 페이퍼 12개월 + 정량 게이트 7종 + 사용자 명시 결정 시에만 라이브 전환 | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
 | R9 | `shared/schema/`가 DB 스키마 단일 진실 (ORM auto-DDL 명시 금지) | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
 | R10 | 빌드·테스트 독립성 (`go/`·`research/` 각자 단독 실행 가능) | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
 

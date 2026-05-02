@@ -94,10 +94,18 @@ authors: yuhojin, Claude (브레인스토밍 세션)
 - **Why**: in-sample 백테스트는 거의 항상 거짓말함. 페이퍼 트레이딩 자원도 검증된 전략에만 할당.
 - **How**: 새 전략은 walk-forward (rolling out-of-sample) 백테스트 통과 + quant-skeptic 검증 통과 후에만 페이퍼 단계 진입.
 
-### R8. 페이퍼 트레이딩 6개월 미만 → 라이브 전환 금지
+### R8. 페이퍼 트레이딩 12개월 미만 + 정량 게이트 7종 + 사용자 명시 결정 → 라이브 전환 금지
 
-- **Why**: 통계적으로 유의미한 표본 확보 전 실거래 전환은 도박.
-- **How**: 페이퍼 트레이딩 시작일을 DB에 기록. (a) 6개월 경과 + (b) 최소 거래 횟수 충족 + (c) 일일 손실 한도 미위반 모두 충족 시에만 라이브 전환 게이트 통과.
+- **Why**: 통계적으로 유의미한 표본 확보 + 자동 통과만으로 자본 투입 방지. Option A (검증 우선, 라이브는 사용자 명시 결정 후) 적용.
+- **How**: 페이퍼 트레이딩 시작일을 DB에 기록. 다음 모두 충족 시에만 라이브 전환 게이트 통과:
+  - (a) 페이퍼 트레이딩 12개월 경과
+  - (b) Sharpe ratio 1.0 이상 (95% 신뢰구간 하한, net of all costs)
+  - (c) SPY 대비 연환산 +2% 이상 우월 (한국 양도세·환전 비용·수수료 차감 후)
+  - (d) 최대 낙폭(Max Drawdown) 25% 이내
+  - (e) 백테스트 ↔ 페이퍼 결과 차이 30% 이내
+  - (f) 6개월 연속 무중단 운영 + critical 버그 0건
+  - (g) **사용자가 명시적으로 "라이브 전환" 결정** — 자동 통과만으로는 절대 시작 안 함
+- 정량 기준 (b)~(f)는 Phase 10 게이트 설계 시점에 미세 조정 가능. (a)와 (g)는 변경 불가.
 
 ### R9. shared/schema/ 가 DB 스키마 단일 진실 원천
 
@@ -300,17 +308,18 @@ volumes:
 
 | Phase | 내용 | 산출물 |
 |-------|------|--------|
-| 0 (이번) | 골격 + 하네스 + 룰 | 디렉터리/문서/에이전트 정의 |
-| 1 | 데이터 인제스트 (Go) | FRED·Alpaca 가격 수집기 → Postgres |
-| 2 | Feature Engineering (Python) | 가격/거래량/거시 features 테이블 |
+| 0 (완료) | 골격 + 하네스 + 룰 | 디렉터리/문서/에이전트 정의 |
+| 1 | 데이터 인제스트 (Go) | FRED·Alpaca·**EDGAR(SEC 재무제표)** 수집기 → Postgres |
+| 2 | Feature Engineering (Python) | 가격/거래량/거시/**펀더멘털(재무 건전성)** features 테이블 |
 | 3 | 백테스트 엔진 + Clenow Momentum | walk-forward 백테스트 결과 |
 | 4 | Yield Curve Regime Filter 추가 | 멀티 시그널 결합 결과 |
+| **4.5** | **Quality 팩터 결합 (재무제표 기반 종목 필터)** | **모멘텀 + 재무 건전성 멀티팩터 백테스트** |
 | 5 | 브로커 추상화 + Alpaca 어댑터 (단위) | 인터페이스 + 어댑터 단위 테스트 통과 |
 | 6 | 실행 엔진 (Go) + 페이퍼 자동 사이클 (R1 GTC 포함) | 어댑터를 사용한 자동 주문·청산, 페이퍼 계좌 |
 | 7 | 추가 안전장치 (일일 손실 한도, 글로벌 킬스위치, 외부 알림 채널) | Phase 6의 기본 GTC 위에 운영 안전망 |
 | 8 | Champion/Challenger 파이프라인 | 자동 재학습·교체 워크플로우 |
-| 9 | KIS 어댑터 (라이브용) | 두 번째 어댑터, 추상화 검증 |
-| 10 | 페이퍼→라이브 전환 게이트 | 6개월 페이퍼 통계 검토 후 결정 |
+| **9 (조건부)** | KIS 어댑터 (라이브용) | **사용자가 라이브 전환 결정 후 시작.** 두 번째 어댑터, 추상화 검증 |
+| **10 (조건부)** | 페이퍼→라이브 전환 게이트 | **R8 정량 게이트 7종 모두 통과 + 사용자 명시 결정 시 시작** |
 
 각 Phase는 자체 spec → plan → implement → review 사이클을 가진다.
 
@@ -357,3 +366,4 @@ volumes:
 | 2026-05-02 | 실행 룰 차등 적용 추가 | Phase 0 Task 1·2 실측 후 doc-only task에 3-stage 리뷰 적용은 비효율로 판단 → 룰 보강: code task는 3-stage, doc-only(마크다운·README·system prompt 등 실행 불가능 자산)는 implementer + spec reviewer 2-stage만. 동일 성격 doc 다수는 task 번들링 허용(커밋은 파일별 분리). |
 | 2026-05-02 | TDD·code-review·investigate 스킬 룰 추가 | Phase 0 회고 — `test-driven-development`, `requesting-code-review`, `investigate` 스킬을 형식적으로 호출하지 않고 진행한 사실 발견 → §7.1 "Phase 1+ code task 추가 룰" 신설: TDD 강제, 코드 리뷰는 `requesting-code-review` 스킬 형식 사용, 디버깅은 `investigate` 4-phase 적용. Phase 0은 면제(코드 자산 없음). |
 | 2026-05-02 | 에이전트 모델 핀 고정 | 6개 에이전트 정의에 `model:` 필드 추가 — strategist/execution/data: sonnet, skeptic/risk: opus, docs-keeper: haiku. 이유: 부모 세션 모델 상속 시 호출 컨텍스트 따라 결과 비일관. §6 표 + 파일 형식 템플릿 동기화. |
+| 2026-05-02 | Option A 강화 + 재무제표 도입 + Phase 4.5 신설 | 사용자가 (a) 페이퍼 검증 후 사용자 명시 결정 시에만 라이브, (b) 재무제표 활용 본격화, (c) Quality 팩터 별도 Phase 신설 채택 → R8 강화(6개월 → 12개월 + 정량 게이트 7종 + 사용자 게이트), §9 로드맵 표 갱신: Phase 1에 EDGAR, Phase 2에 펀더멘털 features, Phase 4.5 신설, Phase 9·10을 "조건부" 표기. CLAUDE.md / ARCHITECTURE.md / ROADMAP.md / STATUS.md 동기화. |

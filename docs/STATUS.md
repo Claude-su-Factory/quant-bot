@@ -10,12 +10,13 @@
 - [ ] Phase 2 — Feature Engineering (Python)
 - [ ] Phase 3 — 백테스트 엔진 + Clenow Momentum
 - [ ] Phase 4 — Yield Curve Regime Filter
+- [ ] Phase 4.5 — Quality 팩터 결합 (재무제표 기반 종목 필터)
 - [ ] Phase 5 — 브로커 추상화 + Alpaca 어댑터 (단위)
 - [ ] Phase 6 — 실행 엔진 + 페이퍼 자동 사이클 (R1 GTC 포함)
 - [ ] Phase 7 — 추가 안전장치 (일일 손실 한도, 글로벌 킬스위치, 외부 알림)
 - [ ] Phase 8 — Champion/Challenger 파이프라인
-- [ ] Phase 9 — KIS 어댑터 (라이브용)
-- [ ] Phase 10 — 페이퍼→라이브 전환 게이트
+- [ ] Phase 9 — KIS 어댑터 (라이브용) [조건부 — 사용자 라이브 결정 후]
+- [ ] Phase 10 — 페이퍼→라이브 전환 게이트 [조건부 — Phase 9와 동시]
 
 ## 알려진 결함
 
@@ -23,6 +24,7 @@
 
 ## 최근 변경 이력
 
+- **2026-05-02** Option A 강화 + 재무제표 도입 + Phase 4.5 신설 — R8 강화 (페이퍼 12개월 + 정량 게이트 7종 + 사용자 명시 결정), Phase 1에 EDGAR 재무제표 수집 추가, Phase 2에 펀더멘털 지표 추가, Phase 4.5 (Quality 팩터) 신설, Phase 9·10 조건부 표기
 - **2026-05-02** 에이전트 모델 핀 고정 — 6개 에이전트 frontmatter에 `model:` 추가 (strategist/execution/data=sonnet, skeptic/risk=opus, docs-keeper=haiku). 호출 컨텍스트 무관하게 일관된 모델 사용
 - **2026-05-02** 룰 보강 — Phase 1+ code task에 TDD(`test-driven-development` 스킬), 코드 리뷰(`requesting-code-review` 스킬), 디버깅(`investigate` 스킬) 강제 룰 추가 (CLAUDE.md / spec / plan 동기화)
 - **2026-05-02** Phase 0 완료 — 디렉터리 골격, 하네스 문서 5종, 6명 에이전트 정의, Docker Postgres+TimescaleDB 인프라 구축
