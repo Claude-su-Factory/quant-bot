@@ -1,0 +1,13 @@
+.PHONY: test fmt lint build
+
+test:  ## go test 전체
+	go test ./...
+
+fmt:  ## go fmt 전체
+	go fmt ./...
+
+lint:  ## go vet 전체
+	go vet ./...
+
+build:  ## 모든 cmd 빌드
+	go build ./...
