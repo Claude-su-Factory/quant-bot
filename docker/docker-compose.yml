@@ -1,0 +1,21 @@
+services:
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: quant-bot-db
+    environment:
+      POSTGRES_DB: quantbot
+      POSTGRES_USER: quantbot
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - quant-bot-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quantbot -d quantbot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  quant-bot-data:
