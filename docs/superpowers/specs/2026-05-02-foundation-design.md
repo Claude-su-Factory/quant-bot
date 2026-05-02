@@ -208,6 +208,16 @@ tools: Read, Write, Edit, Bash, Glob, Grep   # 권한 화이트리스트
   ```
 
 - **구현 실행 방식 (MANDATORY)** — 본 프로젝트의 모든 plan은 `superpowers:subagent-driven-development`로 실행한다. Inline Execution(`superpowers:executing-plans`)은 사용하지 않는다. 이유: (a) Task별 fresh subagent 디스패치로 메인 컨텍스트 보존, (b) Task 사이 spec/code 리뷰 단계 자동 삽입, (c) 사용자가 정한 "작업별 전문 에이전트 최적 활용" 철학과 부합.
+  - **리뷰 단계 — task 성격에 따라 차등 적용**:
+    - **Code task (실행 가능 코드 또는 빌드/실행 인프라 변경 포함)**: implementer → spec reviewer → code-quality reviewer 3-stage 모두 진행.
+    - **Doc-only task (마크다운/JSON/YAML 데이터 파일·README·system prompt 등 실행 불가능 자산만)**: implementer → spec reviewer까지만 진행, code-quality 리뷰 생략. 텍스트 정합성은 spec 리뷰가 충분히 검증.
+    - 판단 기준: "이 task의 산출물에 버그가 있을 수 있는가?" 가능 → code task. 불가능(텍스트 일치만) → doc-only task.
+  - **Task 번들링 허용**: 동일 성격 doc 파일 다수(예: 에이전트 정의 6개)는 1 task로 묶어도 무방. 단, 커밋은 파일별로 분리해 원자성 유지.
+  - **Phase 1+ code task 추가 룰 (MANDATORY)**:
+    - **TDD 강제**: implementer 프롬프트는 반드시 서브에이전트가 `superpowers:test-driven-development` 스킬을 호출하도록 명시한다. 사이클: 실패 테스트 작성 → 실행해 실패 확인 → 최소 구현 → 실행해 통과 확인 → 커밋. placeholder 테스트로 우회 금지.
+    - **코드 리뷰는 스킬 형식 사용**: code-quality 리뷰 단계에서 `superpowers:code-reviewer` 에이전트를 직접 Agent 툴로 호출하지 말고 `superpowers:requesting-code-review` 스킬을 호출해 그 템플릿(BASE_SHA / HEAD_SHA / WHAT_WAS_IMPLEMENTED / DESCRIPTION)을 따른다.
+    - **디버깅 시**: 버그·테스트 실패·예상치 못한 동작 발생 시 `superpowers:investigate` 스킬을 호출 (root cause 4-phase: investigate → analyze → hypothesize → implement). "iron law: no fixes without root cause".
+    - **적용 시점**: Phase 0(scaffolding)은 코드 자산이 없어 면제. Phase 1부터 적용.
 
 - **스펙 자체 검토 사이클 (MANDATORY)** — 본 프로젝트의 모든 spec(`docs/superpowers/specs/*.md`)은 다음 절차를 거친다:
   1. **1차 자체 검토 (자동/필수)**: 작성 직후 Critical / Important / Minor 분류로 이슈 식별 → 사용자에게 보고 → 인라인 패치 → §검토 이력에 기록
@@ -341,3 +351,5 @@ volumes:
 | 2026-05-02 | 2차 자체 검토 (사용자 요청) | Critical 2건(C4·C5), Important 5건(I7·I8·I9·I11·I12·I13), Minor 5건(M6·M7·M9·M10·M12) 식별 → 모두 인라인 패치. 주요 변경: R1에 브로커 capability 강제 + Phase 6/7 순서 명시, R2에 알림 채널 시작 기본값(stderr+로그), R3에 `{seq}` 생성 메커니즘(Postgres sequence), R4에 자동 재학습은 외부 스케줄러로 명시, R9에 ORM 자동 DDL 명시적 금지, quant-strategist 권한 제약 강화, CLAUDE.md R요약 표 형식 강제, Phase 5/6/7 표현 명확화, db-check를 컨테이너 내 `pg_isready`로 변경, §11에 Go 모듈 경로·이미지 버전 핀·노트북 정책·백업 전략 추가 |
 | 2026-05-02 | 사용자 승인 + 메타룰 추가 | 사용자가 "다중 라운드 자체 검토" 패턴을 프로젝트 표준으로 채택 요청 → §7.1 CLAUDE.md 명세에 "스펙 자체 검토 사이클 (MANDATORY)" 5단계 절차 추가. 본 spec 승인. |
 | 2026-05-02 | 실행 방식 룰 추가 | 사용자가 "항상 Subagent-Driven 실행"을 프로젝트 표준으로 채택 → §7.1 CLAUDE.md 명세에 "구현 실행 방식 (MANDATORY)" 룰 추가. Inline Execution 사용 금지. |
+| 2026-05-02 | 실행 룰 차등 적용 추가 | Phase 0 Task 1·2 실측 후 doc-only task에 3-stage 리뷰 적용은 비효율로 판단 → 룰 보강: code task는 3-stage, doc-only(마크다운·README·system prompt 등 실행 불가능 자산)는 implementer + spec reviewer 2-stage만. 동일 성격 doc 다수는 task 번들링 허용(커밋은 파일별 분리). |
+| 2026-05-02 | TDD·code-review·investigate 스킬 룰 추가 | Phase 0 회고 — `test-driven-development`, `requesting-code-review`, `investigate` 스킬을 형식적으로 호출하지 않고 진행한 사실 발견 → §7.1 "Phase 1+ code task 추가 룰" 신설: TDD 강제, 코드 리뷰는 `requesting-code-review` 스킬 형식 사용, 디버깅은 `investigate` 4-phase 적용. Phase 0은 면제(코드 자산 없음). |

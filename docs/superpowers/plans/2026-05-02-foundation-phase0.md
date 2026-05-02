@@ -1241,6 +1241,16 @@ Create `CLAUDE.md`:
 
 - **Why**: (a) Task별 fresh subagent 디스패치로 메인 컨텍스트 보존, (b) Task 사이 spec/code 리뷰 단계 자동 삽입, (c) 사용자가 정한 "작업별 전문 에이전트 최적 활용" 철학과 부합.
 - **How to apply**: plan 실행 시 항상 `superpowers:subagent-driven-development` 스킬을 호출. 단일 task만 실행하고 싶더라도 같은 스킬 사용.
+- **리뷰 단계 — task 성격에 따라 차등 적용**:
+  - **Code task** (실행 가능 코드 또는 빌드/실행 인프라 변경 포함): implementer → spec reviewer → code-quality reviewer 3-stage 모두 진행.
+  - **Doc-only task** (마크다운/JSON/YAML 데이터 파일·README·system prompt 등 실행 불가능 자산만): implementer → spec reviewer까지만 진행, code-quality 리뷰 생략.
+  - 판단 기준: "이 task의 산출물에 버그가 있을 수 있는가?" 가능 → code task. 불가능(텍스트 일치만) → doc-only task.
+- **Task 번들링 허용**: 동일 성격 doc 파일 다수(예: 에이전트 정의 6개)는 1 task로 묶어도 무방. 단, 커밋은 파일별로 분리해 원자성 유지.
+- **Phase 1+ code task 추가 룰 (MANDATORY)**:
+  - **TDD 강제**: implementer 프롬프트는 반드시 서브에이전트가 `superpowers:test-driven-development` 스킬을 호출하도록 명시. 사이클: 실패 테스트 작성 → 실행해 실패 확인 → 최소 구현 → 실행해 통과 확인 → 커밋. placeholder 테스트로 우회 금지.
+  - **코드 리뷰는 스킬 형식 사용**: code-quality 리뷰 단계에서 `superpowers:code-reviewer` 에이전트를 직접 Agent 툴로 호출하지 말고 `superpowers:requesting-code-review` 스킬을 호출해 그 템플릿(BASE_SHA / HEAD_SHA / WHAT_WAS_IMPLEMENTED / DESCRIPTION)을 따른다.
+  - **디버깅 시**: 버그·테스트 실패·예상치 못한 동작 발생 시 `superpowers:investigate` 스킬을 호출 (root cause 4-phase: investigate → analyze → hypothesize → implement). "iron law: no fixes without root cause".
+  - **적용 시점**: Phase 0(scaffolding)은 코드 자산이 없어 면제. Phase 1부터 적용.
 
 ## 스펙 자체 검토 사이클 (MANDATORY)
 
