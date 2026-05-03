@@ -1,19 +1,8 @@
 # Roadmap
 
-**현재 추천 다음 작업**: Phase 1a — Foundation Infrastructure (Go)
+**현재 추천 다음 작업**: Phase 1b — 데이터 인제스트 (Go)
 
 ## Phase 상세
-
-### Phase 1a — Foundation Infrastructure (Go) [Tier 1 필수]
-
-Phase 1b 데이터 수집 시작 전 Go 측 공통 인프라 구축. 상세는 [spec 2026-05-03](superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md):
-- TOML 설정 시스템 (`config/config.toml` + `config.example.toml` + Go 로더)
-- 구조화 JSON 로그 시스템 (Go `log/slog`, Unix 밀리초 타임스탬프)
-- DB 연결 풀 (Go `pgxpool`, fail-fast 헬스체크)
-- 공통 에러 패턴 (sentinel + `fmt.Errorf("%w", ...)` wrapping)
-- 새 룰 R11~R13 도입 (단일 TOML 진실, fail-fast, 시간 컨벤션)
-- 새 룰 Claude 오너 모드 도입
-- (Python 인프라는 Phase 2에서 동일 패턴으로 추가)
 
 ### Phase 1b — 데이터 인제스트 (Go) [Tier 1 필수]
 
@@ -108,7 +97,7 @@ R8의 7가지 통과 기준 자동 검사 + 사용자 명시 결정:
 
 ## Tier 분류
 
-- **Tier 1 (필수)**: Phase 1a, 1b, 2, 3, 4, 4.5, 5, 6, 7
+- **Tier 1 (필수)**: Phase 1b, 2, 3, 4, 4.5, 5, 6, 7
 - **Tier 2 (권장)**: Phase 8 (없어도 라이브 운영은 가능)
 - **Tier 3 (조건부)**: Phase 9, 10 (사용자가 라이브 전환 결정 시에만 시작)
 

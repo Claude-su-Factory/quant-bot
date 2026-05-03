@@ -34,6 +34,9 @@
 | R8 | 페이퍼 12개월 + 정량 게이트 7종 + 사용자 명시 결정 시에만 라이브 전환 | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
 | R9 | `shared/schema/`가 DB 스키마 단일 진실 (ORM auto-DDL 명시 금지) | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
 | R10 | 빌드·테스트 독립성 (`go/`·`research/` 각자 단독 실행 가능) | [§4](docs/superpowers/specs/2026-05-02-foundation-design.md) |
+| R11 | 설정은 단일 TOML 파일이 단일 진실 원천 (example 동기화 강제) | [§4](docs/superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md) |
+| R12 | 봇 시작 시 fail-fast 검증 (config → 검증 → DB 핑 → 진입) | [§4](docs/superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md) |
+| R13 | 시간 표현 컨벤션 (로그 Unix ms, DB TIMESTAMPTZ, 코드 언어 타입) | [§4](docs/superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md) |
 
 ## Claude 오너 모드 (MANDATORY)
 
