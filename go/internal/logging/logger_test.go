@@ -3,7 +3,9 @@ package logging
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -34,11 +36,14 @@ func TestLogger_JSON_TimeIsUnixSecondsFloat(t *testing.T) {
 	if !ok {
 		t.Fatalf("time 필드 없음")
 	}
-	switch tv.(type) {
-	case float64:
-		// OK — Unix 초 + 소수점 ms
-	default:
+	tf, ok := tv.(float64)
+	if !ok {
 		t.Errorf("time 필드 타입 기대 float64 (Unix 초.밀리초), 실제 %T", tv)
+		return
+	}
+	// 2001년 9월 9일 ≈ 1e9. 그 이후라면 정상 Unix 타임스탬프.
+	if tf < 1_000_000_000.0 {
+		t.Errorf("time 값이 너무 작음 (zero-time 의심): %f", tf)
 	}
 }
 
@@ -64,8 +69,12 @@ func TestLogger_IncludeCaller_True(t *testing.T) {
 	entry := captureLogJSON(t, "dev", true, func(l *Logger) {
 		l.Info("with caller")
 	})
-	if _, ok := entry["caller"]; !ok {
-		t.Errorf("include_caller=true이지만 caller 필드 없음")
+	caller, ok := entry["caller"].(string)
+	if !ok {
+		t.Fatalf("include_caller=true이지만 caller 필드 없거나 string 아님")
+	}
+	if !strings.Contains(caller, ":") {
+		t.Errorf("caller 형식 기대 'path:line', 실제 %q", caller)
 	}
 }
 
@@ -80,7 +89,7 @@ func TestLogger_IncludeCaller_False(t *testing.T) {
 
 func TestNew_WritesToFile(t *testing.T) {
 	dir := t.TempDir()
-	logger, closeFn, err := New(dir, "info", "paper", false)
+	logger, closeFn, err := newWithStderr(io.Discard, dir, "info", "paper", false)
 	if err != nil {
 		t.Fatalf("New 실패: %v", err)
 	}
@@ -92,8 +101,18 @@ func TestNew_WritesToFile(t *testing.T) {
 	if len(entries) != 1 {
 		t.Fatalf("로그 파일 1개 기대, 실제 %d개", len(entries))
 	}
-	data, _ := os.ReadFile(dir + "/" + entries[0].Name())
+	data, _ := os.ReadFile(filepath.Join(dir, entries[0].Name()))
 	if !bytes.Contains(data, []byte(`"msg":"file test"`)) {
 		t.Errorf("파일에 메시지 기록 X. 내용:\n%s", data)
+	}
+}
+
+func TestLogger_JSON_LevelIsLowercase(t *testing.T) {
+	entry := captureLogJSON(t, "dev", false, func(l *Logger) {
+		l.Info("test")
+	})
+	level, _ := entry["level"].(string)
+	if level != "info" {
+		t.Errorf("level 기대 lowercase 'info', 실제 %q", level)
 	}
 }
