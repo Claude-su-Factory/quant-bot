@@ -51,3 +51,17 @@ func TestValidate_MissingPasswordInPaper(t *testing.T) {
 		t.Errorf("ErrConfigInvalid 기대 (paper에서 password 빈 값), 실제 %v", err)
 	}
 }
+
+func TestLoad_MalformedTOML(t *testing.T) {
+	_, err := Load("testdata/invalid_syntax.toml")
+	if !errors.Is(err, ErrConfigInvalid) {
+		t.Errorf("ErrConfigInvalid 기대 (TOML 파싱 실패), 실제 %v", err)
+	}
+}
+
+func TestLoad_UnknownKey(t *testing.T) {
+	_, err := Load("testdata/unknown_key.toml")
+	if !errors.Is(err, ErrConfigInvalid) {
+		t.Errorf("ErrConfigInvalid 기대 (unknown key), 실제 %v", err)
+	}
+}

@@ -64,8 +64,12 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("%w: %s", ErrConfigMissing, path)
 	}
 	var cfg Config
-	if _, err := toml.DecodeFile(path, &cfg); err != nil {
+	md, err := toml.DecodeFile(path, &cfg)
+	if err != nil {
 		return nil, fmt.Errorf("%w: TOML 파싱 실패: %v", ErrConfigInvalid, err)
+	}
+	if undecoded := md.Undecoded(); len(undecoded) > 0 {
+		return nil, fmt.Errorf("%w: 알 수 없는 키 (typo 의심): %v", ErrConfigInvalid, undecoded)
 	}
 	if err := validate(&cfg); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrConfigInvalid, err)
@@ -93,11 +97,15 @@ func validate(cfg *Config) error {
 	if cfg.Database.PoolMin < 1 {
 		return fmt.Errorf("database.pool_min: 1 이상이어야 함: %d", cfg.Database.PoolMin)
 	}
+	if cfg.Database.PoolMax < 1 {
+		return fmt.Errorf("database.pool_max: 1 이상이어야 함: %d", cfg.Database.PoolMax)
+	}
 	if cfg.Database.PoolMin > cfg.Database.PoolMax {
 		return fmt.Errorf("database.pool_min(%d) > pool_max(%d)", cfg.Database.PoolMin, cfg.Database.PoolMax)
 	}
 
-	// 비밀 검증: paper/live 환경에서만 강제
+	// 비밀 검증: paper/live 환경에서만 강제.
+	// dev/test는 개발 편의상 빈 비밀 허용 (R11 spec §5.3 의도된 예외).
 	strict := cfg.General.Environment == "paper" || cfg.General.Environment == "live"
 	if strict {
 		if cfg.Database.Password == "" {
