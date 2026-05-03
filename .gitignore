@@ -42,6 +42,9 @@ config/config.toml
 shared/artifacts/*
 !shared/artifacts/.gitkeep
 logs/
+logs/launchd-*.log
+go/quantbot
+go/internal/migrate/migrations/
 
 # Coverage outputs
 coverage.out

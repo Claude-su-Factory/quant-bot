@@ -1,6 +1,6 @@
 services:
   db:
-    image: timescale/timescaledb:latest-pg16
+    image: timescale/timescaledb:2.18.0-pg16
     container_name: quant-bot-db
     environment:
       POSTGRES_DB: quantbot

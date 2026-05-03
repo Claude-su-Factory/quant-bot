@@ -1,4 +1,4 @@
-.PHONY: help up down db-check test test-integration fmt lint
+.PHONY: help up down db-check test test-integration fmt lint prepare-migrations
 
 COMPOSE := docker compose -f docker/docker-compose.yml
 
@@ -28,3 +28,7 @@ fmt:  ## Go + Python 포매팅
 lint:  ## Go + Python 린트
 	$(MAKE) -C go lint
 	$(MAKE) -C research lint
+
+prepare-migrations:  ## shared/schema/migrations → go/internal/migrate/migrations 동기화 (R9)
+	@mkdir -p go/internal/migrate/migrations
+	@cp -r shared/schema/migrations/. go/internal/migrate/migrations/
