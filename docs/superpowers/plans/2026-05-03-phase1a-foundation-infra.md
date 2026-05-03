@@ -6,7 +6,7 @@
 
 **Architecture:** TOML 설정을 단일 진실 원천으로 두고, Go 측에 `BurntSushi/toml`로 로드·검증 → `log/slog` 기반 JSON 로거 → `pgx/v5/pgxpool` 기반 DB 풀 → sentinel error + `fmt.Errorf("%w", ...)` wrapping 패턴. 모든 컴포넌트는 fail-fast 검증을 거쳐 `main`에서 의존성 주입으로 사용.
 
-**Tech Stack:** Go 1.22+, BurntSushi/toml v1.4+, log/slog (표준), jackc/pgx/v5/pgxpool, pgxmock/v3 (단위 테스트), Make.
+**Tech Stack:** Go 1.22+, BurntSushi/toml v1.4+, log/slog (표준), jackc/pgx/v5/pgxpool, Make. (pgxpool은 concrete struct라 단위 mock 불가능 → DB 풀은 통합 테스트로 검증)
 
 **Reference Spec:** [`docs/superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md`](../specs/2026-05-03-phase1a-foundation-infra-design.md)
 
@@ -890,7 +890,7 @@ git commit -m "feat(logging): structured JSON logger with Unix-ms time + file ou
 - Create: `go/internal/db/pool.go`, `pool_test.go`, `pool_integration_test.go`
 - Modify: `go/go.mod`, `go/go.sum` (자동)
 
-**구현자에게**: TDD 강제. 단위 테스트는 fixture/mocking, 통합 테스트는 build tag로 분리.
+**구현자에게**: TDD 강제. 단위 테스트는 순수 함수(BuildDSN)만 — pgxpool.Pool은 mock 불가능하므로 풀 동작은 통합 테스트(build tag)에서 실제 Postgres로 검증.
 
 - [ ] **Step 1: pgx 의존성 추가**
 

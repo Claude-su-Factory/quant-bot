@@ -286,8 +286,9 @@ defer pool.Close()  // 종료 시 모든 연결 정리
 
 ### 7.6 테스트 전략
 
-- **단위 테스트**: `pgxmock` (Go)으로 DB 없이 풀 인터페이스 동작 확인. (Python은 Phase 2에서 모킹 추가)
-- **통합 테스트**: 별도 분류, `RUN_INTEGRATION=1` 가드. Docker로 일회성 Postgres 띄워서 실제 핑.
+- **단위 테스트**: `pgxpool.Pool`은 인터페이스가 아닌 concrete struct라 직접 mock 불가능. 순수 함수(`BuildDSN` 등)만 단위 테스트로 검증. `pgxmock`은 `pgx.Conn` 수준만 mock 가능하므로 풀 lifecycle 검증엔 부적합.
+- **통합 테스트**: `NewPool`의 실제 동작(헬스체크, 연결 풀 생성)은 build tag `integration` + `RUN_INTEGRATION=1` 가드 하에 Docker Postgres로 검증. 이게 pgxpool 계열의 정직한 테스트 전략.
+- (Python은 Phase 2에서 동일 정신: 순수 함수만 단위, 풀 lifecycle은 통합)
 
 ## 8. 컴포넌트 4: 공통 에러 처리 패턴
 
