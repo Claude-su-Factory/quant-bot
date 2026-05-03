@@ -96,14 +96,14 @@ DROP EXTENSION IF EXISTS timescaledb;
 CREATE TABLE macro_series (
     series_id   TEXT NOT NULL,                          -- 'T10Y2Y', 'VIXCLS', etc.
     observed_at TIMESTAMPTZ NOT NULL,                   -- 시리즈 관측 일자
-    value       NUMERIC,                                -- NULL 허용 (FRED 휴장일)
+    value       NUMERIC(20, 8),                         -- FRED 8 decimal precision. NULL 허용 (휴장일)
     ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),     -- DB 입력 시각 (R13 point-in-time)
     source      TEXT NOT NULL DEFAULT 'fred',
     PRIMARY KEY (series_id, observed_at)
 );
 SELECT create_hypertable('macro_series', 'observed_at');
-
-CREATE INDEX macro_series_series_idx ON macro_series (series_id, observed_at DESC);
+-- Note: 별도 macro_series_series_idx CREATE INDEX 없음. PK (series_id, observed_at)가
+-- backward scan 가능하므로 DESC 인덱스 중복. 향후 query 프로파일링 결과 필요 시 추가.
 
 -- +goose Down
 DROP TABLE macro_series;
@@ -126,7 +126,7 @@ CREATE TABLE runs (
     instance        TEXT NOT NULL DEFAULT 'paper',        -- R3 instance 토큰 (paper/live/dev/test)
     started_at      TIMESTAMPTZ NOT NULL,
     finished_at     TIMESTAMPTZ,                          -- NULL = 진행 중 또는 비정상 종료
-    status          TEXT NOT NULL,                        -- 'running' / 'success' / 'failed'
+    status          TEXT NOT NULL CHECK (status IN ('running', 'success', 'failed')),  -- DB-level enum
     rows_processed  INTEGER NOT NULL DEFAULT 0,
     retry_count     INTEGER NOT NULL DEFAULT 0,
     error_message   TEXT
