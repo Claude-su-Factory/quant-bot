@@ -1,10 +1,21 @@
 # Roadmap
 
-**현재 추천 다음 작업**: Phase 1 — 데이터 인제스트 (Go)
+**현재 추천 다음 작업**: Phase 1a — Foundation Infrastructure (Go)
 
 ## Phase 상세
 
-### Phase 1 — 데이터 인제스트 (Go) [Tier 1 필수]
+### Phase 1a — Foundation Infrastructure (Go) [Tier 1 필수]
+
+Phase 1b 데이터 수집 시작 전 Go 측 공통 인프라 구축. 상세는 [spec 2026-05-03](superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md):
+- TOML 설정 시스템 (`config/config.toml` + `config.example.toml` + Go 로더)
+- 구조화 JSON 로그 시스템 (Go `log/slog`, Unix 밀리초 타임스탬프)
+- DB 연결 풀 (Go `pgxpool`, fail-fast 헬스체크)
+- 공통 에러 패턴 (sentinel + `fmt.Errorf("%w", ...)` wrapping)
+- 새 룰 R11~R13 도입 (단일 TOML 진실, fail-fast, 시간 컨벤션)
+- 새 룰 Claude 오너 모드 도입
+- (Python 인프라는 Phase 2에서 동일 패턴으로 추가)
+
+### Phase 1b — 데이터 인제스트 (Go) [Tier 1 필수]
 
 데이터 출처 3곳에서 자동 수집 (모두 무료):
 - FRED 거시경제 지표 수집기 (장단기 금리차 T10Y2Y, 변동성지수 VIX, 신용 스프레드 BAMLH0A0HYM2 등)
@@ -13,10 +24,13 @@
 - Postgres TimescaleDB 시계열 테이블 스키마 (`shared/schema/`)
 - DB 마이그레이션 도구 결정 (`golang-migrate` vs `goose`)
 - TimescaleDB 이미지 버전 핀 고정 (`latest-pg16` → 특정 버전)
+- `[retry]` config 섹션 도입 (재시도 사용처 처음 등장)
 
-### Phase 2 — Feature Engineering (Python) [Tier 1 필수]
+### Phase 2 — Feature Engineering (Python) + Python Foundation Infra [Tier 1 필수]
 
-수집한 원시 데이터에서 매매에 쓸 지표(features)를 계산:
+Python 측 공통 인프라 (Phase 1a에서 이연된 부분) + 본 Phase 작업:
+- Python 인프라: `config.py`, `db.py`, `log.py`, `errors.py` (Phase 1a spec의 동일 패턴)
+- 수집한 원시 데이터에서 매매에 쓸 지표(features)를 계산:
 - `shared/contracts/features.md` 카탈로그 초기화 (R6)
 - 가격 지표 (수익률 1일·5일·21일·63일·252일, 모멘텀 12-1, ATR 평균변동폭)
 - 거래량 지표 (평균 대비 거래량 비율, OBV 누적 거래량)
@@ -94,7 +108,7 @@ R8의 7가지 통과 기준 자동 검사 + 사용자 명시 결정:
 
 ## Tier 분류
 
-- **Tier 1 (필수)**: Phase 1, 2, 3, 4, 4.5, 5, 6, 7
+- **Tier 1 (필수)**: Phase 1a, 1b, 2, 3, 4, 4.5, 5, 6, 7
 - **Tier 2 (권장)**: Phase 8 (없어도 라이브 운영은 가능)
 - **Tier 3 (조건부)**: Phase 9, 10 (사용자가 라이브 전환 결정 시에만 시작)
 

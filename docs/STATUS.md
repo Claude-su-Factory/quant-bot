@@ -1,13 +1,14 @@
 # Project Status
 
-**현재 Phase**: Phase 0 완료. 다음: Phase 1 — 데이터 인제스트 (Go)
-**마지막 업데이트**: 2026-05-02
+**현재 Phase**: Phase 0 완료. 다음: Phase 1a — Foundation Infrastructure (Go)
+**마지막 업데이트**: 2026-05-03
 
 ## Phase 진행 상황
 
 - [x] **Phase 0** — 골격 + 하네스 + 룰 (2026-05-02 완료)
-- [ ] Phase 1 — 데이터 인제스트 (Go)
-- [ ] Phase 2 — Feature Engineering (Python)
+- [ ] Phase 1a — Foundation Infrastructure (Go)
+- [ ] Phase 1b — 데이터 인제스트 (Go)
+- [ ] Phase 2 — Python Foundation Infra + Feature Engineering
 - [ ] Phase 3 — 백테스트 엔진 + Clenow Momentum
 - [ ] Phase 4 — Yield Curve Regime Filter
 - [ ] Phase 4.5 — Quality 팩터 결합 (재무제표 기반 종목 필터)
@@ -24,6 +25,7 @@
 
 ## 최근 변경 이력
 
+- **2026-05-03** 오너 모드 룰 + Phase 1a/1b 분리 + Foundation Infra spec — Claude 오너 모드 룰 신설(CLAUDE.md), Phase 1을 1a(Foundation Infra) + 1b(Data Ingest) 분리, Python 인프라 Phase 2로 이연 (YAGNI), Phase 1a spec(`2026-05-03-phase1a-foundation-infra-design.md`) 작성·자체 검토 4라운드
 - **2026-05-02** Option A 강화 + 재무제표 도입 + Phase 4.5 신설 — R8 강화 (페이퍼 12개월 + 정량 게이트 7종 + 사용자 명시 결정), Phase 1에 EDGAR 재무제표 수집 추가, Phase 2에 펀더멘털 지표 추가, Phase 4.5 (Quality 팩터) 신설, Phase 9·10 조건부 표기
 - **2026-05-02** 에이전트 모델 핀 고정 — 6개 에이전트 frontmatter에 `model:` 추가 (strategist/execution/data=sonnet, skeptic/risk=opus, docs-keeper=haiku). 호출 컨텍스트 무관하게 일관된 모델 사용
 - **2026-05-02** 룰 보강 — Phase 1+ code task에 TDD(`test-driven-development` 스킬), 코드 리뷰(`requesting-code-review` 스킬), 디버깅(`investigate` 스킬) 강제 룰 추가 (CLAUDE.md / spec / plan 동기화)
