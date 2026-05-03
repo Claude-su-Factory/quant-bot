@@ -1,4 +1,4 @@
-module github.com/yuhojin/quant-bot/go
+module github.com/Claude-su-Factory/quant-bot/go
 
 go 1.22
 

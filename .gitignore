@@ -42,3 +42,11 @@ config/config.toml
 shared/artifacts/*
 !shared/artifacts/.gitkeep
 logs/
+
+# Coverage outputs
+coverage.out
+coverage.html
+*.cov
+
+# Build outputs
+bin/

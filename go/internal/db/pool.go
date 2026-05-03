@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/yuhojin/quant-bot/go/internal/config"
+	"github.com/Claude-su-Factory/quant-bot/go/internal/config"
 )
 
 var (

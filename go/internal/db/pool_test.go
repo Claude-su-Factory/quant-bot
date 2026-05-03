@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/yuhojin/quant-bot/go/internal/config"
+	"github.com/Claude-su-Factory/quant-bot/go/internal/config"
 )
 
 func TestBuildDSN_FormatsCorrectly(t *testing.T) {

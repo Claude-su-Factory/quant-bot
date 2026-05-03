@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yuhojin/quant-bot/go/internal/config"
+	"github.com/Claude-su-Factory/quant-bot/go/internal/config"
 )
 
 // 통합 테스트: 실제 Postgres가 5432에 떠 있어야 함.
