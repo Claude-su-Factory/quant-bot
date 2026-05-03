@@ -1,7 +1,10 @@
-.PHONY: test fmt lint build
+.PHONY: test test-integration fmt lint build
 
-test:  ## go test 전체
+test:  ## go test 단위만 (외부 의존 X)
 	go test ./...
+
+test-integration:  ## 통합 테스트 (실제 Postgres 필요)
+	RUN_INTEGRATION=1 go test -tags=integration ./...
 
 fmt:  ## go fmt 전체
 	go fmt ./...
