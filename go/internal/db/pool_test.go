@@ -32,8 +32,15 @@ func TestBuildDSN_EscapesSpecialPasswordChars(t *testing.T) {
 		PoolMin: 1, PoolMax: 1,
 	}
 	dsn := BuildDSN(cfg)
-	// '/'는 path 구분자가 아니라 password 안에서 escape돼야 함
+	// negative: raw 형태 그대로 X
 	if strings.Contains(dsn, "a:b/c?d#e") {
-		t.Errorf("특수문자 escape 안 됨: %s", dsn)
+		t.Errorf("특수문자 raw 노출: %s", dsn)
+	}
+	// positive: 각 reserved 문자가 percent-encode된 형태 포함
+	// (RFC 3986 userinfo 컨텍스트: ':' '/' '?' '#'는 인코딩됨)
+	for _, encoded := range []string{"%3A", "%2F", "%3F", "%23"} {
+		if !strings.Contains(dsn, encoded) {
+			t.Errorf("기대 인코딩 %q 없음: %s", encoded, dsn)
+		}
 	}
 }

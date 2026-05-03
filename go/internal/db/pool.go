@@ -43,10 +43,12 @@ func BuildDSN(cfg config.DatabaseConfig) string {
 func NewPool(ctx context.Context, cfg config.DatabaseConfig) (*pgxpool.Pool, error) {
 	pool, err := pgxpool.New(ctx, BuildDSN(cfg))
 	if err != nil {
-		return nil, fmt.Errorf("pgxpool.New: %w", err)
+		return nil, fmt.Errorf("%w: pgxpool.New: %v", ErrPoolUnreachable, err)
 	}
 
-	pingCtx, cancel := context.WithTimeout(ctx, healthCheckTimeout)
+	// 헬스체크는 외부 ctx 취소·deadline과 무관하게 1초 보장 (R12 fail-fast).
+	// 부모 ctx에서 파생하면 caller가 짧은 deadline을 줬을 때 spurious 실패 가능.
+	pingCtx, cancel := context.WithTimeout(context.Background(), healthCheckTimeout)
 	defer cancel()
 	if err := pool.Ping(pingCtx); err != nil {
 		pool.Close()
