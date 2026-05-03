@@ -1,0 +1,25 @@
+[general]
+environment = "dev"
+log_level = "info"
+
+[database]
+host = "localhost"
+port = 5432
+name = "quantbot"
+user = "quantbot"
+password = "REPLACE_ME"
+pool_min = 2
+pool_max = 10
+
+[alpaca]
+api_key = "REPLACE_ME"
+api_secret = "REPLACE_ME"
+paper = true
+base_url = "https://paper-api.alpaca.markets"
+
+[fred]
+api_key = "REPLACE_ME"
+
+[logging]
+file_dir = "logs"
+include_caller = false

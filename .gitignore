@@ -38,6 +38,7 @@ Thumbs.db
 
 # Project
 .env
+config/config.toml
 shared/artifacts/*
 !shared/artifacts/.gitkeep
 logs/
