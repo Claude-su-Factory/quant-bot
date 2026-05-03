@@ -44,9 +44,15 @@ func newTestPool(t *testing.T) *pgxpool.Pool {
 // DROP EXTENSION 후 재생성 시 충돌하므로 extension은 제거하지 않는다.
 func resetDB(t *testing.T, pool *pgxpool.Pool, ctx context.Context) {
 	t.Helper()
-	pool.Exec(ctx, "DROP TABLE IF EXISTS runs CASCADE")
-	pool.Exec(ctx, "DROP TABLE IF EXISTS macro_series CASCADE")
-	pool.Exec(ctx, "DROP TABLE IF EXISTS goose_db_version CASCADE")
+	for _, stmt := range []string{
+		"DROP TABLE IF EXISTS runs CASCADE",
+		"DROP TABLE IF EXISTS macro_series CASCADE",
+		"DROP TABLE IF EXISTS goose_db_version CASCADE",
+	} {
+		if _, err := pool.Exec(ctx, stmt); err != nil {
+			t.Fatalf("resetDB %q 실패: %v", stmt, err)
+		}
+	}
 }
 
 func TestUp_AppliesAllMigrations(t *testing.T) {

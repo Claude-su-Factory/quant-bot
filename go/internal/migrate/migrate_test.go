@@ -1,6 +1,7 @@
 package migrate
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -28,6 +29,9 @@ func TestMigrationsFS_OnlySQL(t *testing.T) {
 	for _, e := range entries {
 		if e.IsDir() {
 			t.Errorf("하위 디렉터리는 없어야 함: %s", e.Name())
+		}
+		if !strings.HasSuffix(e.Name(), ".sql") {
+			t.Errorf("non-SQL 파일 발견: %s", e.Name())
 		}
 	}
 }
