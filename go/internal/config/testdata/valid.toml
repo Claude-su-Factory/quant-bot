@@ -1,0 +1,25 @@
+[general]
+environment = "paper"
+log_level = "info"
+
+[database]
+host = "localhost"
+port = 5432
+name = "quantbot"
+user = "quantbot"
+password = "secret123"
+pool_min = 2
+pool_max = 10
+
+[alpaca]
+api_key = "AK_TEST"
+api_secret = "AS_TEST"
+paper = true
+base_url = "https://paper-api.alpaca.markets"
+
+[fred]
+api_key = "FRED_TEST"
+
+[logging]
+file_dir = "logs"
+include_caller = false
