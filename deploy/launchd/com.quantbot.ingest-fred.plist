@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.quantbot.ingest-fred</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>{{QUANTBOT_BINARY_PATH}}</string>
+		<string>ingest</string>
+		<string>fred</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>{{QUANTBOT_PROJECT_PATH}}</string>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key><integer>22</integer>
+		<key>Minute</key><integer>0</integer>
+	</dict>
+	<key>StandardOutPath</key>
+	<string>{{QUANTBOT_PROJECT_PATH}}/logs/launchd-ingest-fred.out.log</string>
+	<key>StandardErrorPath</key>
+	<string>{{QUANTBOT_PROJECT_PATH}}/logs/launchd-ingest-fred.err.log</string>
+	<key>RunAtLoad</key>
+	<false/>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>QUANTBOT_CONFIG</key>
+		<string>{{QUANTBOT_PROJECT_PATH}}/config/config.toml</string>
+	</dict>
+</dict>
+</plist>

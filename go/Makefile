@@ -12,5 +12,5 @@ fmt:  ## go fmt 전체
 lint:  ## go vet 전체
 	go vet ./...
 
-build:  ## 모든 cmd 빌드
-	go build ./...
+build:  ## quantbot binary 빌드 (-o quantbot, ldflags Version 임베드)
+	go build -o quantbot -ldflags="-X main.Version=$$(git describe --tags --always --dirty 2>/dev/null || echo dev)" ./cmd/quantbot
