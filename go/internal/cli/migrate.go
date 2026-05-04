@@ -11,7 +11,11 @@ import (
 
 func RunMigrate(args []string) {
 	fs := flag.NewFlagSet("migrate", flag.ExitOnError)
-	configPath := fs.String("config", "config/config.toml", "config 파일 경로")
+	defaultConfig := os.Getenv("QUANTBOT_CONFIG")
+	if defaultConfig == "" {
+		defaultConfig = "config/config.toml"
+	}
+	configPath := fs.String("config", defaultConfig, "config 파일 경로 (기본: $QUANTBOT_CONFIG 또는 config/config.toml)")
 	fs.Parse(args)
 
 	if fs.NArg() < 1 {

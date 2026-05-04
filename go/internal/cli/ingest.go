@@ -16,7 +16,11 @@ const fredDefaultBaseURL = "https://api.stlouisfed.org/fred"
 
 func RunIngest(args []string) {
 	fs := flag.NewFlagSet("ingest", flag.ExitOnError)
-	configPath := fs.String("config", "config/config.toml", "config 파일 경로")
+	defaultConfig := os.Getenv("QUANTBOT_CONFIG")
+	if defaultConfig == "" {
+		defaultConfig = "config/config.toml"
+	}
+	configPath := fs.String("config", defaultConfig, "config 파일 경로 (기본: $QUANTBOT_CONFIG 또는 config/config.toml)")
 	fs.Parse(args)
 
 	if fs.NArg() < 1 {
@@ -49,7 +53,13 @@ func runFRED(ctx context.Context, app *App) {
 		os.Exit(1)
 	}
 
-	backfillStart, _ := time.Parse("2006-01-02", app.Cfg.Ingest.BackfillStartDate)
+	var backfillStart time.Time
+	backfillStart, err = time.Parse("2006-01-02", app.Cfg.Ingest.BackfillStartDate)
+	if err != nil {
+		app.Logger.Error("BackfillStartDate 파싱 실패",
+			"val", app.Cfg.Ingest.BackfillStartDate, "err", err)
+		os.Exit(1)
+	}
 	client := fred.New(fredDefaultBaseURL, app.Cfg.FRED.APIKey)
 	ing := fred.NewIngester(client, app.Pool, fred.Config{
 		Series:            app.Cfg.Ingest.FREDSeries,
@@ -63,16 +73,20 @@ func runFRED(ctx context.Context, app *App) {
 
 	res, err := ing.Run(ctx)
 	if err != nil {
-		repo.FinishRun(ctx, app.Pool, runID, repo.RunResult{
+		if ferr := repo.FinishRun(ctx, app.Pool, runID, repo.RunResult{
 			Status: "failed", Error: err, RowsProcessed: res.RowsProcessed, RetryCount: res.RetryCount,
-		})
+		}); ferr != nil {
+			app.Logger.Error("FinishRun 기록 실패", "err", ferr)
+		}
 		app.Logger.Error("FRED 인제스트 실패", "err", err, "rows", res.RowsProcessed)
 		os.Exit(1)
 	}
 
-	repo.FinishRun(ctx, app.Pool, runID, repo.RunResult{
+	if ferr := repo.FinishRun(ctx, app.Pool, runID, repo.RunResult{
 		Status: "success", RowsProcessed: res.RowsProcessed, RetryCount: res.RetryCount,
-	})
+	}); ferr != nil {
+		app.Logger.Error("FinishRun 기록 실패", "err", ferr)
+	}
 	app.Logger.Info("FRED 인제스트 완료", "rows", res.RowsProcessed, "retries", res.RetryCount)
 	fmt.Printf("✅ FRED 수집 완료: %d행 (재시도 %d회)\n", res.RowsProcessed, res.RetryCount)
 }

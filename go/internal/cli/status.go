@@ -13,7 +13,11 @@ import (
 
 func RunStatus(args []string) {
 	fs := flag.NewFlagSet("status", flag.ExitOnError)
-	configPath := fs.String("config", "config/config.toml", "config 파일 경로")
+	defaultConfig := os.Getenv("QUANTBOT_CONFIG")
+	if defaultConfig == "" {
+		defaultConfig = "config/config.toml"
+	}
+	configPath := fs.String("config", defaultConfig, "config 파일 경로 (기본: $QUANTBOT_CONFIG 또는 config/config.toml)")
 	fs.Parse(args)
 
 	ctx := context.Background()
@@ -45,8 +49,8 @@ func RunStatus(args []string) {
 		}
 		emoji := statusEmoji(r.Status)
 		errMsg := r.ErrorMessage
-		if len(errMsg) > 40 {
-			errMsg = errMsg[:40] + "..."
+		if runes := []rune(errMsg); len(runes) > 40 {
+			errMsg = string(runes[:40]) + "..."
 		}
 		fmt.Fprintf(w, "%s\t%s\t%s %s\t%d\t%d\t%s\t%s\n",
 			r.StartedAt.Local().Format("2006-01-02 15:04:05"),
@@ -60,18 +64,21 @@ func RunStatus(args []string) {
 		`SELECT series_id, MAX(observed_at), COUNT(*), MAX(ingested_at)
 		 FROM macro_series GROUP BY series_id ORDER BY series_id`)
 	if err == nil {
+		defer rows.Close()
 		ws := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(ws, "시리즈\t마지막 관측\t총 행수\tDB 입력")
 		for rows.Next() {
 			var sid string
 			var observed, ingested time.Time
 			var n int
-			rows.Scan(&sid, &observed, &n, &ingested)
+			if err := rows.Scan(&sid, &observed, &n, &ingested); err != nil {
+				app.Logger.Warn("macro_series scan 실패", "err", err)
+				continue
+			}
 			fmt.Fprintf(ws, "%s\t%s\t%d\t%s\n", sid,
 				observed.Local().Format("2006-01-02"), n,
 				ingested.Local().Format("2006-01-02 15:04:05"))
 		}
-		rows.Close()
 		ws.Flush()
 	}
 	fmt.Println()
