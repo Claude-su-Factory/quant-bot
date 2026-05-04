@@ -5,6 +5,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -30,13 +31,12 @@ func InsertObservations(ctx context.Context, pool *pgxpool.Pool, obs []Observati
 	}
 	defer tx.Rollback(ctx)
 
+	// batch=100: PostgreSQL 파라미터 한도(65535) / 컬럼 3 = 21845가 상한이지만
+	// 100이면 충분히 안전하고 트랜잭션 단위로 적정.
 	const batch = 100
 	inserted := 0
 	for start := 0; start < len(obs); start += batch {
-		end := start + batch
-		if end > len(obs) {
-			end = len(obs)
-		}
+		end := min(start+batch, len(obs))
 		ct, err := insertBatch(ctx, tx, obs[start:end])
 		if err != nil {
 			return 0, err
@@ -49,19 +49,22 @@ func InsertObservations(ctx context.Context, pool *pgxpool.Pool, obs []Observati
 	return inserted, nil
 }
 
+// insertBatch는 obs를 단일 INSERT로 처리한다.
+// pgx.CopyFrom을 사용하지 않는 이유: ON CONFLICT 미지원 (spec §7.5).
 func insertBatch(ctx context.Context, tx pgx.Tx, obs []Observation) (int, error) {
 	args := make([]any, 0, len(obs)*3)
-	values := ""
+	var sb strings.Builder
+	sb.Grow(len(obs) * 16)
 	for i, o := range obs {
 		if i > 0 {
-			values += ","
+			sb.WriteByte(',')
 		}
-		values += fmt.Sprintf("($%d,$%d,$%d)", i*3+1, i*3+2, i*3+3)
+		fmt.Fprintf(&sb, "($%d,$%d,$%d)", i*3+1, i*3+2, i*3+3)
 		args = append(args, o.SeriesID, o.ObservedAt, o.Value)
 	}
 	q := fmt.Sprintf(
 		"INSERT INTO macro_series (series_id, observed_at, value) VALUES %s ON CONFLICT (series_id, observed_at) DO NOTHING",
-		values,
+		sb.String(),
 	)
 	ct, err := tx.Exec(ctx, q, args...)
 	if err != nil {

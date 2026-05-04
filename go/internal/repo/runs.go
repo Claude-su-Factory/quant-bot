@@ -1,3 +1,5 @@
+// runs.go: 운영 실행 메타 (StartRun/FinishRun/RecentRuns/StaleRuns).
+// quantbot status 명령과 ingest 명령이 호출.
 package repo
 
 import (
@@ -51,7 +53,7 @@ func FinishRun(ctx context.Context, pool *pgxpool.Pool, id int64, r RunResult) e
 		s := r.Error.Error()
 		errMsg = &s
 	}
-	_, err := pool.Exec(ctx,
+	ct, err := pool.Exec(ctx,
 		`UPDATE runs SET finished_at = NOW(), status = $1, rows_processed = $2,
 		                  retry_count = $3, error_message = $4
 		 WHERE id = $5`,
@@ -59,6 +61,9 @@ func FinishRun(ctx context.Context, pool *pgxpool.Pool, id int64, r RunResult) e
 	)
 	if err != nil {
 		return fmt.Errorf("FinishRun UPDATE: %w", err)
+	}
+	if ct.RowsAffected() == 0 {
+		return fmt.Errorf("FinishRun: run id %d not found", id)
 	}
 	return nil
 }
@@ -107,7 +112,7 @@ func StaleRuns(ctx context.Context, pool *pgxpool.Pool) ([]Run, error) {
 		var r Run
 		if err := rows.Scan(&r.ID, &r.JobName, &r.Instance, &r.StartedAt,
 			&r.FinishedAt, &r.Status, &r.RowsProcessed, &r.RetryCount, &r.ErrorMessage); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("StaleRuns Scan: %w", err)
 		}
 		out = append(out, r)
 	}
