@@ -111,11 +111,17 @@ func TestRun_Idempotent(t *testing.T) {
 	ing := NewIngester(client, pool, cfg, "paper")
 	ctx := context.Background()
 
-	r1, _ := ing.Run(ctx)
+	r1, err := ing.Run(ctx)
+	if err != nil {
+		t.Fatalf("첫번째 Run 실패: %v", err)
+	}
 	if r1.RowsProcessed != 1 {
 		t.Errorf("첫 실행 rows 기대 1, 실제 %d", r1.RowsProcessed)
 	}
-	r2, _ := ing.Run(ctx)
+	r2, err := ing.Run(ctx)
+	if err != nil {
+		t.Fatalf("두번째 Run 실패: %v", err)
+	}
 	if r2.RowsProcessed != 0 {
 		t.Errorf("idempotent 두번째 rows 기대 0, 실제 %d", r2.RowsProcessed)
 	}

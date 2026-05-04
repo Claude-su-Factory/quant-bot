@@ -11,6 +11,24 @@ import (
 
 func TestFetchSeries_ParsesObservations(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Query params 검증 — client가 올바른 URL 패턴 보내는지
+		q := r.URL.Query()
+		if got := q.Get("series_id"); got != "T10Y2Y" {
+			t.Errorf("series_id 기대 T10Y2Y, 실제 %q", got)
+		}
+		if got := q.Get("api_key"); got != "test_api_key" {
+			t.Errorf("api_key 기대 test_api_key, 실제 %q", got)
+		}
+		if got := q.Get("file_type"); got != "json" {
+			t.Errorf("file_type 기대 json, 실제 %q", got)
+		}
+		if got := q.Get("observation_start"); got != "2026-04-01" {
+			t.Errorf("observation_start 기대 2026-04-01, 실제 %q", got)
+		}
+		if got := q.Get("observation_end"); got != "2026-04-03" {
+			t.Errorf("observation_end 기대 2026-04-03, 실제 %q", got)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{
 			"observations": [

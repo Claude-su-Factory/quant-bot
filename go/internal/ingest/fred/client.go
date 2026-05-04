@@ -66,9 +66,16 @@ func (c *Client) FetchSeries(ctx context.Context, seriesID string, start, end ti
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
+	body, readErr := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 400 {
-		return nil, &HTTPError{StatusCode: resp.StatusCode, Body: string(body)}
+		bodyStr := string(body)
+		if readErr != nil {
+			bodyStr = fmt.Sprintf("[body read error: %v] partial: %s", readErr, bodyStr)
+		}
+		return nil, &HTTPError{StatusCode: resp.StatusCode, Body: bodyStr}
+	}
+	if readErr != nil {
+		return nil, fmt.Errorf("FRED HTTP body 읽기 실패: %w", readErr)
 	}
 
 	var raw struct {
@@ -102,6 +109,9 @@ func (c *Client) FetchSeries(ctx context.Context, seriesID string, start, end ti
 
 // IsRetryable는 FRED API 결과가 재시도 대상인지 판단.
 // HTTPError 4xx → false (단, 429는 rate limit이라 재시도). 5xx 재시도. 네트워크 등 그 외 재시도.
+//
+// 참고: 429 응답의 Retry-After 헤더는 무시하고 cfg.Retry 백오프 사용.
+// FRED 120 req/min 제한 + 우리는 일별 ~4회 호출이라 실효 충분 (over-engineering 회피).
 func IsRetryable(err error) bool {
 	var hErr *HTTPError
 	if errors.As(err, &hErr) {

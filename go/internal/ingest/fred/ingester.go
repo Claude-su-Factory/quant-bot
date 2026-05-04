@@ -32,6 +32,9 @@ type Ingester struct {
 }
 
 // NewIngester는 의존성 주입으로 Ingester 생성.
+// instance: 운영 환경 식별자(paper/live/dev/test). 현재 Run에선 미사용이지만
+// 향후 structured logging (slog.With("instance", ...))에 사용 예정 (Phase 1b-B).
+// runs 테이블의 instance 컬럼은 cli 레이어가 별도로 처리 (spec §7.2).
 func NewIngester(client *Client, pool *pgxpool.Pool, cfg Config, instance string) *Ingester {
 	return &Ingester{client: client, pool: pool, cfg: cfg, instance: instance}
 }
@@ -40,6 +43,8 @@ func NewIngester(client *Client, pool *pgxpool.Pool, cfg Config, instance string
 // 실패 시 마지막 에러 반환. 부분 성공 시 누적 통계 반환.
 func (i *Ingester) Run(ctx context.Context) (Result, error) {
 	var res Result
+	// 같은 Run 내 모든 series에 일관된 cut-off 적용 (retry 지연으로 series 간 drift 방지)
+	end := time.Now().UTC()
 	for _, seriesID := range i.cfg.Series {
 		last, err := repo.LastObservedAt(ctx, i.pool, seriesID)
 		if err != nil {
@@ -49,9 +54,9 @@ func (i *Ingester) Run(ctx context.Context) (Result, error) {
 		if last.IsZero() {
 			start = i.cfg.BackfillStartDate
 		} else {
+			// LastObservedAt은 UTC TIMESTAMPTZ 보장 (DST 무관, 24시간 ADD 안전)
 			start = last.Add(24 * time.Hour)
 		}
-		end := time.Now().UTC()
 		if !start.Before(end) {
 			continue
 		}
