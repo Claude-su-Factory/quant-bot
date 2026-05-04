@@ -37,6 +37,7 @@
 | R11 | 설정은 단일 TOML 파일이 단일 진실 원천 (example 동기화 강제) | [§4](docs/superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md) |
 | R12 | 봇 시작 시 fail-fast 검증 (config → 검증 → DB 핑 → 진입) | [§4](docs/superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md) |
 | R13 | 시간 표현 컨벤션 (로그 Unix ms, DB TIMESTAMPTZ, 코드 언어 타입) | [§4](docs/superpowers/specs/2026-05-03-phase1a-foundation-infra-design.md) |
+| R14 | 운영 작업은 stateless CLI + macOS launchd (사용자 매일 부담 0) | [§4](docs/superpowers/specs/2026-05-03-phase1b-a-ingest-infra-fred-design.md) |
 
 ## Claude 오너 모드 (MANDATORY)
 

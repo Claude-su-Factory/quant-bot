@@ -1,13 +1,14 @@
 # Project Status
 
-**현재 Phase**: Phase 1a 완료. 다음: Phase 1b — 데이터 인제스트 (Go)
-**마지막 업데이트**: 2026-05-03
+**현재 Phase**: Phase 1b-A 완료. 다음: Phase 1b-B — Alpaca 가격 + EDGAR 재무제표 수집기
+**마지막 업데이트**: 2026-05-04
 
 ## Phase 진행 상황
 
 - [x] **Phase 0** — 골격 + 하네스 + 룰 (2026-05-02 완료)
 - [x] Phase 1a — Foundation Infrastructure (Go) (2026-05-03 완료)
-- [ ] Phase 1b — 데이터 인제스트 (Go)
+- [x] Phase 1b-A — 인프라 + FRED 수집기 (2026-05-04 완료)
+- [ ] Phase 1b-B — Alpaca + EDGAR 수집기
 - [ ] Phase 2 — Python Foundation Infra + Feature Engineering
 - [ ] Phase 3 — 백테스트 엔진 + Clenow Momentum
 - [ ] Phase 4 — Yield Curve Regime Filter
@@ -25,6 +26,7 @@
 
 ## 최근 변경 이력
 
+- **2026-05-04** Phase 1b-A 완료 — TimescaleDB 마이그레이션 (goose), retry helper, repo 패턴, FRED 인제스터 (4 시리즈 × 20년 백필), CLI (ingest/status/migrate/version), LaunchAgent 자동 셋업 (사용자 매일 부담 0), R14 도입, v0.2.0-phase1b-a 태그
 - **2026-05-03** Phase 1a 완료 — Go 인프라 4종(설정 로더·로거·DB 풀·에러 패턴) 구현, R11~R13 도입, test-integration target 신설, v0.1.0-phase1a 태그
 - **2026-05-03** 오너 모드 룰 + Phase 1a/1b 분리 + Foundation Infra spec — Claude 오너 모드 룰 신설(CLAUDE.md), Phase 1을 1a(Foundation Infra) + 1b(Data Ingest) 분리, Python 인프라 Phase 2로 이연 (YAGNI), Phase 1a spec(`2026-05-03-phase1a-foundation-infra-design.md`) 작성·자체 검토 4라운드
 - **2026-05-02** Option A 강화 + 재무제표 도입 + Phase 4.5 신설 — R8 강화 (페이퍼 12개월 + 정량 게이트 7종 + 사용자 명시 결정), Phase 1에 EDGAR 재무제표 수집 추가, Phase 2에 펀더멘털 지표 추가, Phase 4.5 (Quality 팩터) 신설, Phase 9·10 조건부 표기

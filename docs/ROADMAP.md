@@ -1,19 +1,15 @@
 # Roadmap
 
-**현재 추천 다음 작업**: Phase 1b — 데이터 인제스트 (Go)
+**현재 추천 다음 작업**: Phase 1b-B — Alpaca 가격 + EDGAR 재무제표 수집기
 
 ## Phase 상세
 
-### Phase 1b — 데이터 인제스트 (Go) [Tier 1 필수]
+### Phase 1b-B — Alpaca 가격 + EDGAR 재무제표 수집기 [Tier 1 필수]
 
-데이터 출처 3곳에서 자동 수집 (모두 무료):
-- FRED 거시경제 지표 수집기 (장단기 금리차 T10Y2Y, 변동성지수 VIX, 신용 스프레드 BAMLH0A0HYM2 등)
-- Alpaca 일봉 가격 수집기 (S&P 500 종목군 — 미국 대형주 500개)
-- **EDGAR 재무제표 수집기** — 미국 증권거래위원회 SEC 공시 분기·연간 재무제표 (10-Q, 10-K). 무료
-- Postgres TimescaleDB 시계열 테이블 스키마 (`shared/schema/`)
-- DB 마이그레이션 도구 결정 (`golang-migrate` vs `goose`)
-- TimescaleDB 이미지 버전 핀 고정 (`latest-pg16` → 특정 버전)
-- `[retry]` config 섹션 도입 (재시도 사용처 처음 등장)
+Phase 1b-A에서 정립한 인제스터 패턴(retry · repo · CLI · LaunchAgent)을 두 데이터 소스에 확장:
+- Alpaca 일봉 가격 수집기 (S&P 500 종목군 — 미국 대형주 500개) — `prices_daily` hypertable
+- **EDGAR 재무제표 수집기** — SEC 공시 분기·연간 재무제표 (10-Q, 10-K) — `fundamentals` 테이블
+- 새 LaunchAgent 2개 (com.quantbot.ingest-alpaca, com.quantbot.ingest-edgar)
 
 ### Phase 2 — Feature Engineering (Python) + Python Foundation Infra [Tier 1 필수]
 
@@ -97,7 +93,7 @@ R8의 7가지 통과 기준 자동 검사 + 사용자 명시 결정:
 
 ## Tier 분류
 
-- **Tier 1 (필수)**: Phase 1b, 2, 3, 4, 4.5, 5, 6, 7
+- **Tier 1 (필수)**: Phase 1b-B, 2, 3, 4, 4.5, 5, 6, 7
 - **Tier 2 (권장)**: Phase 8 (없어도 라이브 운영은 가능)
 - **Tier 3 (조건부)**: Phase 9, 10 (사용자가 라이브 전환 결정 시에만 시작)
 
