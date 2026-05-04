@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/BurntSushi/toml"
 )
@@ -24,6 +25,8 @@ type Config struct {
 	Alpaca   AlpacaConfig   `toml:"alpaca"`
 	FRED     FREDConfig     `toml:"fred"`
 	Logging  LoggingConfig  `toml:"logging"`
+	Retry    RetryConfig    `toml:"retry"`
+	Ingest   IngestConfig   `toml:"ingest"`
 }
 
 type GeneralConfig struct {
@@ -55,6 +58,17 @@ type FREDConfig struct {
 type LoggingConfig struct {
 	FileDir       string `toml:"file_dir"`
 	IncludeCaller bool   `toml:"include_caller"`
+}
+
+type RetryConfig struct {
+	MaxAttempts       int     `toml:"max_attempts"`
+	BackoffInitialMs  int     `toml:"backoff_initial_ms"`
+	BackoffMultiplier float64 `toml:"backoff_multiplier"`
+}
+
+type IngestConfig struct {
+	BackfillStartDate string   `toml:"backfill_start_date"`
+	FREDSeries        []string `toml:"fred_series"`
 }
 
 // Load는 path의 TOML 파일을 읽고 검증한다.
@@ -117,6 +131,25 @@ func validate(cfg *Config) error {
 		if cfg.FRED.APIKey == "" {
 			return fmt.Errorf("fred.api_key: %s 환경에서 빈 값 금지", cfg.General.Environment)
 		}
+	}
+
+	// retry
+	if cfg.Retry.MaxAttempts < 1 {
+		return fmt.Errorf("retry.max_attempts: 1 이상이어야 함: %d", cfg.Retry.MaxAttempts)
+	}
+	if cfg.Retry.BackoffInitialMs < 1 {
+		return fmt.Errorf("retry.backoff_initial_ms: 1 이상이어야 함: %d", cfg.Retry.BackoffInitialMs)
+	}
+	if cfg.Retry.BackoffMultiplier < 1.0 {
+		return fmt.Errorf("retry.backoff_multiplier: 1.0 이상이어야 함: %f", cfg.Retry.BackoffMultiplier)
+	}
+
+	// ingest
+	if _, err := time.Parse("2006-01-02", cfg.Ingest.BackfillStartDate); err != nil {
+		return fmt.Errorf("ingest.backfill_start_date: ISO 8601(YYYY-MM-DD) 형식 X: %q", cfg.Ingest.BackfillStartDate)
+	}
+	if len(cfg.Ingest.FREDSeries) == 0 {
+		return fmt.Errorf("ingest.fred_series: 비어있을 수 없음")
 	}
 
 	return nil

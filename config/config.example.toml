@@ -23,3 +23,12 @@ api_key = "REPLACE_ME"
 [logging]
 file_dir = "logs"
 include_caller = false
+
+[retry]
+max_attempts = 3
+backoff_initial_ms = 1000
+backoff_multiplier = 2.0
+
+[ingest]
+backfill_start_date = "2006-01-01"
+fred_series = ["T10Y2Y", "VIXCLS", "BAMLH0A0HYM2", "DFF"]
